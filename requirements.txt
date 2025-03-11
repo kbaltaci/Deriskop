@@ -3,3 +3,4 @@ tensorflow-cpu
 numpy
 werkzeug
 gunicorn
+pandas
