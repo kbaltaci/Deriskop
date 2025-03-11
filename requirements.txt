@@ -1,3 +1,5 @@
 Flask
 numpy
-tensorflow
+pandas
+tensorflow==2.10.0
+gunicorn
