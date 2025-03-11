@@ -5,7 +5,8 @@ import os
 app = Flask(__name__)
 
 # TensorFlow Lite modelini yükle
-interpreter = tf.lite.Interpreter(model_path="skin_cancer_model.tflite")
+model_path = os.path.join(os.path.dirname(__file__), "skin_cancer_model.tflite")
+interpreter = tf.lite.Interpreter(model_path)
 interpreter.allocate_tensors()
 input_details = interpreter.get_input_details()
 output_details = interpreter.get_output_details()
