@@ -1,0 +1,58 @@
+import os
+import gdown
+import tensorflow as tf
+from tensorflow import keras
+from tensorflow.keras.preprocessing import image
+import numpy as np
+from flask import Flask, render_template, request
+from werkzeug.utils import secure_filename
+
+# Flask uygulaması
+app = Flask(__name__)
+
+# Fotoğraf yükleme ayarları
+UPLOAD_FOLDER = 'uploads'
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg'}
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+
+# Google Drive'dan modeli indirme
+MODEL_PATH = "skin_cancer_model.h5"
+GDRIVE_URL = 'https://drive.google.com/file/d/1eiQgjDutm0ycugeiTEBSm1gkwylk1x_i/view?usp=sharing'
+
+if not os.path.exists(MODEL_PATH):
+    print("Model dosyası bulunamadı, Google Drive'dan indiriliyor...")
+    gdown.download(GDRIVE_URL, MODEL_PATH, quiet=False)
+else:
+    print("Model dosyası bulundu, yükleniyor...")
+
+# Modeli yükle
+model = keras.models.load_model(MODEL_PATH)
+
+# İzin verilen dosya uzantıları
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+# Tahmin fonksiyonu
+def predict_image(img_path):
+    img = image.load_img(img_path, target_size=(128, 128))
+    img_array = image.img_to_array(img) / 255.0
+    img_array = np.expand_dims(img_array, axis=0)
+    prediction = model.predict(img_array)
+    return prediction[0][0] * 100  # Yüzde olarak döndür
+
+@app.route("/", methods=["GET", "POST"])
+def index():
+    if request.method == "POST":
+        file = request.files['file']
+        if file and allowed_file(file.filename):
+            filename = secure_filename(file.filename)
+            filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+            file.save(filepath)
+
+            # Tahmin yap
+            result_percentage = predict_image(filepath)
+            return render_template('index.html', prediction=result_percentage, image_file=filename)
+    return render_template('index.html')
+
+if __name__ == "__main__":
+    app.run(debug=True)
