@@ -1,5 +1,3 @@
-Flask
-gunicorn
-tensorflow-cpu
-numpy
-pandas
+tensorflow-lite==2.12.0
+flask==2.2.2
+numpy==1.23.5
