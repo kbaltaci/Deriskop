@@ -1,4 +1,4 @@
 Flask
-pip install tensorflow-cpu
+install tensorflow-cpu
 numpy
 werkzeug
