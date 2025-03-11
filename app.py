@@ -1,63 +1,42 @@
-from flask import Flask, request, render_template
+from flask import Flask, request, render_template, jsonify
 import numpy as np
-from tensorflow import lite
-from tensorflow.keras.preprocessing import image
+import tensorflow as tf
 
 app = Flask(__name__)
 
-# TFLite modelini yükle
-interpreter = lite.Interpreter(model_path="skin_cancer_model.tflite")
+# TensorFlow Lite modelini yükle
+interpreter = tf.lite.Interpreter(model_path="skin_cancer_model.tflite")
 interpreter.allocate_tensors()
+input_details = interpreter.get_input_details()
+output_details = interpreter.get_output_details()
 
-# Görseli işlemek ve modelin tahmin yapabilmesi için uygun formata dönüştürmek
-def prepare_image(img):
-    img = img.resize((128, 128))  # Resmi boyutlandırma
-    img_array = np.array(img)  # NumPy dizisine dönüştürme
-    img_array = img_array / 255.0  # Ölçeklendirme
-    return np.expand_dims(img_array, axis=0)  # Modelin tahmin yapabilmesi için boyutlandırma
-
-# TensorFlow Lite ile tahmin yapma
-def predict(image_array):
-    input_details = interpreter.get_input_details()
-    output_details = interpreter.get_output_details()
-
-    # Giriş verisini al
-    input_data = np.array(image_array, dtype=np.float32)
-
-    # Tahmin işlemi
-    interpreter.set_tensor(input_details[0]['index'], input_data)
-    interpreter.invoke()
-
-    # Çıktıyı al
-    output_data = interpreter.get_tensor(output_details[0]['index'])
-    return output_data[0][0]  # Modelin çıktısını döndür
-
+# Ana sayfa
 @app.route('/')
 def home():
-    return render_template('index.html')  # HTML formunu render et
+    return render_template('index.html')
 
+# Tahmin endpoint'i
 @app.route('/predict', methods=['POST'])
-def predict_image():
+def predict():
     if 'file' not in request.files:
-        return render_template('index.html', prediction="No file part")
-    
+        return jsonify({'error': 'No file uploaded'})
+
     file = request.files['file']
-    
     if file.filename == '':
-        return render_template('index.html', prediction="No selected file")
-    
-    if file:
-        img = image.load_img(file, target_size=(128, 128))
-        img_array = prepare_image(img)
-        
-        # Modeli kullanarak tahmin yap
-        prediction = predict(img_array)
-        
-        # Sonuçları döndür
-        result = 'Malignant' if prediction > 0.5 else 'Benign'
-        confidence = float(prediction) * 100
-        
-        return render_template('index.html', prediction=result, confidence=confidence)
+        return jsonify({'error': 'No file selected'})
+
+    # Görseli yükle ve ön işleme yap
+    img = tf.keras.preprocessing.image.load_img(file, target_size=(128, 128))
+    img_array = tf.keras.preprocessing.image.img_to_array(img)
+    img_array = np.expand_dims(img_array, axis=0) / 255.0
+
+    # Tahmin yap
+    interpreter.set_tensor(input_details[0]['index'], img_array)
+    interpreter.invoke()
+    prediction = interpreter.get_tensor(output_details[0]['index'])
+    result = "Malignant" if prediction[0][0] > 0.5 else "Benign"
+
+    return jsonify({'prediction': result})
 
 if __name__ == '__main__':
     app.run(debug=True)
