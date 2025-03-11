@@ -1,0 +1,28 @@
+# Python dosyaları
+*.pyc
+*.pyo
+*.pyd
+__pycache__/
+
+# Sanal ortamlar
+venv/
+env/
+.venv/
+
+# Loglar ve geçici dosyalar
+*.log
+*.tmp
+
+# Büyük veri setleri
+*.csv
+*.npz
+*.h5
+*.tflite
+
+# IDE ve işletim sistemi dosyaları
+.DS_Store
+.idea/
+.vscode/
+
+# TensorFlow Lite modeli (eğer başka bir yerde saklanıyorsa)
+skin_cancer_model.tflite
