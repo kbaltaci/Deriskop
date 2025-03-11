@@ -1,5 +1,5 @@
 Flask
+gunicorn
+tensorflow-cpu
 numpy
 pandas
-tensorflow==2.10.0
-gunicorn
