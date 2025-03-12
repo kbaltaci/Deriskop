@@ -5,3 +5,4 @@ werkzeug
 gunicorn
 pandas
 gdown
+Pillow==8.4.0
