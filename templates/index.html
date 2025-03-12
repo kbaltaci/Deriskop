@@ -66,8 +66,8 @@
         {% if prediction %}
             <div class="result">
                 <p>Sonuç: <strong>{{ prediction|round(2) }}%</strong></p>
-                <p>{{ 'Malignant' if prediction > 50 else 'Benign' }}</p>
-                <img src="{{ url_for('static', filename='uploads/' + image_file) }}" alt="Uploaded Image">
+                <p>{{ 'Dikkat: Kötü Huylu Olabilir' if prediction > 50 else 'Risk Taşımıyor' }}</p>
+                
             </div>
         {% endif %}
     </div>
