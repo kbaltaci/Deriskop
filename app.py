@@ -17,8 +17,9 @@ app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 # Google Drive'dan modeli indirme
 MODEL_PATH = "skin_cancer_model.h5"
-GDRIVE_URL = 'https://drive.google.com/file/d/1eiQgjDutm0ycugeiTEBSm1gkwylk1x_i/view?usp=sharing'
+GDRIVE_URL = https://drive.google.com/file/d/1eiQgjDutm0ycugeiTEBSm1gkwylk1x_i/view'  # URL'yi düzenledik
 
+# Modeli indir
 if not os.path.exists(MODEL_PATH):
     print("Model dosyası bulunamadı, Google Drive'dan indiriliyor...")
     gdown.download(GDRIVE_URL, MODEL_PATH, quiet=False)
