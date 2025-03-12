@@ -15,9 +15,13 @@ UPLOAD_FOLDER = 'uploads'
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg'}
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
+# uploads klasörünü kontrol et, yoksa oluştur
+if not os.path.exists(UPLOAD_FOLDER):
+    os.makedirs(UPLOAD_FOLDER)
+
 # Google Drive'dan modeli indirme
 MODEL_PATH = "skin_cancer_model.h5"
-GDRIVE_URL = 'https://drive.google.com/uc?export=download&id=1eiQgjDutm0ycugeiTEBSm1gkwylk1x_i'  # URL'yi düzenledik
+GDRIVE_URL = 'https://drive.google.com/uc?export=download&id=1eiQgjDutm0ycugeiTEBSm1gkwylk1x_i'
 
 # Modeli indir
 if not os.path.exists(MODEL_PATH):
