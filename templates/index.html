@@ -66,7 +66,7 @@
         {% if prediction %}
             <div class="result">
                 <p>Sonuç: <strong>{{ prediction|round(2) }}%</strong></p>
-                <p>{{ 'Dikkat: Kötü Huylu Olabilir' if prediction > 50 else 'Risk Taşımıyor' }}</p>
+                <p style="color: {{ 'red' if prediction > 50 else 'green' }}">{{ 'Dikkat: Kötü Huylu Olabilir' if prediction > 50 else 'Risk Taşımıyor' }}</p>
                 
             </div>
         {% endif %}
