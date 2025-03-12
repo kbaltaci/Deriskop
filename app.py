@@ -44,17 +44,23 @@ def predict_image(img_path):
 @app.route("/", methods=["GET", "POST"])
 def index():
     if request.method == "POST":
-        file = request.files['file']
-        if file and allowed_file(file.filename):
-            filename = secure_filename(file.filename)
-            filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-            file.save(filepath)
+        try:
+            file = request.files['file']
+            if file and allowed_file(file.filename):
+                filename = secure_filename(file.filename)
+                filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+                file.save(filepath)
 
-            # Tahmin yap
-            result_percentage = predict_image(filepath)
-            return render_template('index.html', prediction=result_percentage, image_file=filename)
+                # Tahmin yap
+                result_percentage = predict_image(filepath)
+                return render_template('index.html', prediction=result_percentage, image_file=filename)
+            else:
+                return "Geçersiz dosya formatı!", 400
+        except Exception as e:
+            print(f"Error occurred: {e}")  # Detaylı hata mesajı loga yazılacak
+            return f"Sunucu hatası: {e}", 500
     return render_template('index.html')
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))  # Heroku'nun atadığı portu kullan
-    app.run(host="0.0.0.0", port=port, debug=True)
+    app.run(host="0.0.0.0", port=port, debug=True)  # Debug modunu aktif ettik
