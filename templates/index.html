@@ -4,137 +4,91 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Cilt Kanseri Tahmini</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background: linear-gradient(-45deg, #00509e, #e22609, #0073e6, #5dade2);
-            background-size: 400% 400%;
-            animation: gradientBG 8s ease infinite;
-            margin: 0;
-            padding: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            text-align: center;
-        }
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        background: linear-gradient(-45deg, #00509e, #e22609, #0073e6, #5dade2);
+        background-size: 400% 400%;
+        animation: gradientBG 8s ease infinite;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        text-align: center;
+    }
 
-        @keyframes gradientBG {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
-        }
+    @keyframes gradientBG {
+        0% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+        100% { background-position: 0% 50%; }
+    }
 
-        .container {
-            background-color: rgba(255, 255, 255, 0.4);
-            border-radius: 10px;
-            padding: 20px;
-            width: 90%;
-            max-width: 500px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.6);
-        }
+.container {
+    background-color: rgba(255, 255, 255, 0.4);
+    border-radius: 10px;
+    padding: 20px;
+    width: 90%;
+    max-width: 400px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.6); /* Gölgelendirme ekleme */
+}
 
-        canvas {
-            border: 1px solid #000;
-            margin-top: 10px;
-            cursor: crosshair;
-            max-width: 100%;
-        }
+    h1 {
+        color: #000000;
+    }
 
-        .btn {
-            padding: 10px 20px;
-            background-color: #002f6c;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            margin-top: 10px;
-        }
+    input[type="file"] {
+        padding: 10px;
+        font-size: 16px;
+    }
 
-        .btn:hover {
-            background-color: #00509e;
-        }
-    </style>
+    .btn {
+        padding: 10px 20px;
+        background-color: #002f6c;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        margin-top: 20px;
+    }
+
+    .btn:hover {
+        background-color: #00509e;
+    }
+
+    .result {
+        margin-top: 20px;
+        font-size: 18px;
+        font-weight: bold;
+        color: #002f6c;
+    }
+
+    img {
+        max-width: 100%;
+        height: auto;
+        margin-top: 20px;
+    }
+</style>
+
 </head>
 <body>
     <div class="container">
         <h1>Cilt Kanseri Tarama Sistemi</h1>
-        <input type="file" id="fileInput" accept="image/*" required>
-        <canvas id="imageCanvas"></canvas>
-        <button class="btn" id="cropButton">Bölgeyi Seç ve Tahmin Et</button>
+        <form action="/" method="post" enctype="multipart/form-data">
+            <input type="file" name="file" required>
+            <button type="submit" class="btn">Tahmin Et</button>
+        </form>
+
+        {% if prediction %}
+            <div class="result">
+                <p>Sonuç: <strong>{{ prediction|round(2) }}%</strong></p>
+                <p style="color: {{ 'red' if prediction > 50 else 'green' }}">{{ 'Dikkat: Kötü Huylu Olabilir' if prediction > 50 else 'Risk Taşımıyor' }}</p>
+            </div>
+        {% endif %}
     </div>
-    
-    <script>
-        let canvas = document.getElementById('imageCanvas');
-        let ctx = canvas.getContext('2d');
-        let image = new Image();
-        let cropping = false;
-        let startX, startY, endX, endY;
-        let isImageLoaded = false;
-
-        document.getElementById('fileInput').addEventListener('change', function(event) {
-            let file = event.target.files[0];
-            let reader = new FileReader();
-            
-            reader.onload = function(e) {
-                image.src = e.target.result;
-            };
-            
-            reader.readAsDataURL(file);
-        });
-
-        image.onload = function() {
-            canvas.width = 400;
-            canvas.height = (image.height / image.width) * 400;
-            ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
-            isImageLoaded = true;
-        };
-
-        canvas.addEventListener('mousedown', function(event) {
-            if (!isImageLoaded) return;
-            startX = event.offsetX;
-            startY = event.offsetY;
-            cropping = true;
-        });
-
-        canvas.addEventListener('mousemove', function(event) {
-            if (cropping) {
-                ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
-                endX = event.offsetX;
-                endY = event.offsetY;
-                ctx.strokeStyle = 'red';
-                ctx.lineWidth = 2;
-                ctx.strokeRect(startX, startY, endX - startX, endY - startY);
-            }
-        });
-
-        canvas.addEventListener('mouseup', function(event) {
-            if (!isImageLoaded) return;
-            endX = event.offsetX;
-            endY = event.offsetY;
-            cropping = false;
-        });
-
-        document.getElementById('cropButton').addEventListener('click', function() {
-            if (!isImageLoaded || startX === undefined || startY === undefined || endX === undefined || endY === undefined) {
-                alert('Lütfen önce bir resim yükleyip seçim yapın!');
-                return;
-            }
-            let width = endX - startX;
-            let height = endY - startY;
-            if (width <= 0 || height <= 0) {
-                alert('Geçerli bir seçim yapın!');
-                return;
-            }
-            let croppedCanvas = document.createElement('canvas');
-            croppedCanvas.width = width;
-            croppedCanvas.height = height;
-            let croppedCtx = croppedCanvas.getContext('2d');
-            croppedCtx.drawImage(canvas, startX, startY, width, height, 0, 0, width, height);
-            let croppedImage = croppedCanvas.toDataURL('image/png');
-            
-            console.log('Seçilen Bölge:', croppedImage);
-        });
-    </script>
 </body>
 </html>
+
+
+
