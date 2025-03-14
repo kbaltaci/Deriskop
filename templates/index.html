@@ -72,15 +72,27 @@
 <body>
     <div class="container">
         <h1>Cilt Kanseri Tarama Sistemi</h1>
-        <input type="file" id="file-input" accept="image/*" required>
-        <div class="img-container">
-            <img id="image-preview" style="max-width: 100%; display: none;">
-        </div>
-        <button id="crop-btn" class="btn" style="display: none;">Kırp ve Gönder</button>
-        <form id="upload-form" action="/" method="post" enctype="multipart/form-data" style="display: none;">
+        <form action="/" method="post" enctype="multipart/form-data">
+            <input type="file" id="file-input" name="file" accept="image/*" required>
+            <div class="img-container">
+                <img id="image-preview" style="max-width: 100%; display: none;">
+            </div>
+            <button id="crop-btn" class="btn" style="display: none;" type="button">Kırp</button>
             <input type="hidden" name="cropped_image" id="cropped-image-data">
             <button type="submit" class="btn">Tahmin Et</button>
         </form>
+
+        {% if prediction is not none %}
+            <div class="result">
+                <p>Sonuç: <strong>{{ prediction|round(2) }}%</strong></p>
+                <p style="color: {{ 'red' if prediction > 50 else 'green' }}">
+                    {{ 'Dikkat: Kötü Huylu Olabilir' if prediction > 50 else 'Risk Taşımıyor' }}
+                </p>
+                {% if image_file %}
+                    <img src="{{ url_for('static', filename='uploads/' + image_file) }}" alt="Yüklenen Görsel" style="max-width: 100%; margin-top: 20px;">
+                {% endif %}
+            </div>
+        {% endif %}
     </div>
 
     <script>
@@ -114,7 +126,6 @@
             });
             if (canvas) {
                 document.getElementById('cropped-image-data').value = canvas.toDataURL('image/png');
-                document.getElementById('upload-form').style.display = 'block';
             }
         });
     </script>
