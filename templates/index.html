@@ -65,14 +65,15 @@
             color: #002f6c;
         }
 
-        img {
-            max-width: 100%;
-            height: auto;
-            margin-top: 20px;
-        }
-
         #image {
             max-width: 100%;
+            max-height: 300px; /* Resim önizleme alanını sınırlama */
+        }
+
+        @media (max-width: 600px) {
+            #image {
+                max-height: 200px; /* Mobil cihazlarda resim önizleme alanını daha da küçültme */
+            }
         }
     </style>
 </head>
@@ -113,6 +114,8 @@
                     cropper = new Cropper(image, {
                         aspectRatio: 1,
                         viewMode: 1,
+                        cropBoxWidth: 200, /* Kırpma alanının başlangıç genişliğini belirleme */
+                        cropBoxHeight: 200, /* Kırpma alanının başlangıç yüksekliğini belirleme */
                     });
                 };
                 reader.readAsDataURL(e.target.files[0]);
