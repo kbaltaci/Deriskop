@@ -7,83 +7,72 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css">
     
-<style>
-    body {
-        font-family: Arial, sans-serif;
-        background: linear-gradient(-45deg, #00509e, #e22609, #0073e6, #5dade2);
-        background-size: 400% 400%;
-        animation: gradientBG 8s ease infinite;
-        margin: 0;
-        padding: 0;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        height: 100vh;
-        text-align: center;
-    }
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(-45deg, #00509e, #e22609, #0073e6, #5dade2);
+            background-size: 400% 400%;
+            animation: gradientBG 8s ease infinite;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            text-align: center;
+        }
 
-    @keyframes gradientBG {
-        0% { background-position: 0% 50%; }
-        50% { background-position: 100% 50%; }
-        100% { background-position: 0% 50%; }
-    }
+        @keyframes gradientBG {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
 
-    .container {
-        background-color: rgba(255, 255, 255, 0.4);
-        border-radius: 10px;
-        padding: 20px;
-        width: 90%;
-        max-width: 400px;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.6);
-    }
+        .container {
+            background-color: rgba(255, 255, 255, 0.4);
+            border-radius: 10px;
+            padding: 20px;
+            width: 90%;
+            max-width: 400px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.6);
+        }
 
-    h1 {
-        color: #000000;
-    }
+        h1 {
+            color: #000000;
+        }
 
-    input[type="file"] {
-        padding: 10px;
-        font-size: 16px;
-    }
+        .btn {
+            padding: 10px 20px;
+            background-color: #002f6c;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 10px;
+            display: block;
+        }
 
-    .btn {
-        padding: 10px 20px;
-        background-color: #002f6c;
-        color: white;
-        border: none;
-        border-radius: 5px;
-        cursor: pointer;
-        margin-top: 10px;
-    }
+        .btn:hover {
+            background-color: #00509e;
+        }
 
-    .btn:hover {
-        background-color: #00509e;
-    }
+        .result {
+            margin-top: 20px;
+            font-size: 18px;
+            font-weight: bold;
+            color: #002f6c;
+        }
 
-    .result {
-        margin-top: 20px;
-        font-size: 18px;
-        font-weight: bold;
-        color: #002f6c;
-    }
+        #imageContainer img {
+            max-width: 100%;
+            margin-top: 10px;
+        }
 
-    img {
-        max-width: 100%;
-        height: auto;
-        margin-top: 10px;
-    }
-
-    #previewContainer {
-        display: none;
-        margin-top: 20px;
-    }
-
-    #croppedImage {
-        max-width: 100%;
-        margin-top: 10px;
-    }
-</style>
-
+        #previewContainer {
+            display: none;
+            margin-top: 20px;
+        }
+    </style>
 </head>
 <body>
     <div class="container">
@@ -96,7 +85,7 @@
         <div id="previewContainer">
             <h3>Kırpılan Bölüm (250x250)</h3>
             <canvas id="croppedCanvas"></canvas>
-            <button class="btn" id="uploadButton">Tahmin Et</button>
+            <button class="btn" id="uploadButton" style="display: block;">Tahmin Et</button>
         </div>
     </div>
 
@@ -110,19 +99,19 @@
 
         fileInput.addEventListener('change', function(event) {
             const file = event.target.files[0];
-
             if (file) {
                 const reader = new FileReader();
                 reader.onload = function(e) {
                     selectedImage.src = e.target.result;
                     selectedImage.style.display = "block";
+                    previewContainer.style.display = "block";
                     
                     if (cropper) {
                         cropper.destroy();
                     }
                     
                     cropper = new Cropper(selectedImage, {
-                        aspectRatio: 1, // Kare kırpma alanı
+                        aspectRatio: 1,
                         viewMode: 1
                     });
                 };
@@ -133,8 +122,7 @@
         uploadButton.addEventListener('click', function() {
             if (cropper) {
                 const croppedImageDataURL = cropper.getCroppedCanvas({ width: 250, height: 250 }).toDataURL("image/png");
-
-                // Canvas'ta önizleme göster
+                
                 const ctx = croppedCanvas.getContext('2d');
                 const img = new Image();
                 img.onload = function() {
@@ -145,11 +133,9 @@
                 };
                 img.src = croppedImageDataURL;
 
-                // Sunucuya kırpılan resmi göndermek için form verisi oluştur
                 const formData = new FormData();
                 formData.append("file", dataURItoBlob(croppedImageDataURL), "cropped-image.png");
 
-                // AJAX ile sunucuya gönder
                 fetch("/", {
                     method: "POST",
                     body: formData
