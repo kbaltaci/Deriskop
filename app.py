@@ -44,7 +44,15 @@ def predict_image(img_path):
     img_array = np.expand_dims(img_array, axis=0)
     prediction = model.predict(img_array)
     prediction= prediction[0][0] * 100  # Yüzde olarak döndür
-    if(prediction>50):
+    if(prediction>90):
+        prediction=prediction-50
+    elif(prediction>80):
+        prediction=prediction-50
+    elif(prediction>70):
+        prediction=prediction-40
+    elif(prediction>60):
+        prediction=prediction-40
+    elif(prediction>50):
         prediction=prediction-40
     return prediction
 @app.route("/", methods=["GET", "POST"])
