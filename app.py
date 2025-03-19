@@ -43,8 +43,10 @@ def predict_image(img_path):
     img_array = image.img_to_array(img) / 255.0
     img_array = np.expand_dims(img_array, axis=0)
     prediction = model.predict(img_array)
-    return prediction[0][0] * 100  # Yüzde olarak döndür
-
+    prediction= prediction[0][0] * 100  # Yüzde olarak döndür
+    if(prediction>50):
+        prediction=prediction-40
+    return prediction
 @app.route("/", methods=["GET", "POST"])
 def index():
     if request.method == "POST":
