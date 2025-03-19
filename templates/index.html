@@ -4,98 +4,91 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Cilt Kanseri Tahmini</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.css">
-    <style>
-        /* CSS kodları burada */
-    </style>
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        background: linear-gradient(-45deg, #00509e, #e22609, #0073e6, #5dade2);
+        background-size: 400% 400%;
+        animation: gradientBG 8s ease infinite;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        text-align: center;
+    }
+
+    @keyframes gradientBG {
+        0% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+        100% { background-position: 0% 50%; }
+    }
+
+.container {
+    background-color: rgba(255, 255, 255, 0.4);
+    border-radius: 10px;
+    padding: 20px;
+    width: 90%;
+    max-width: 400px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.6); /* Gölgelendirme ekleme */
+}
+
+    h1 {
+        color: #000000;
+    }
+
+    input[type="file"] {
+        padding: 10px;
+        font-size: 16px;
+    }
+
+    .btn {
+        padding: 10px 20px;
+        background-color: #002f6c;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        margin-top: 20px;
+    }
+
+    .btn:hover {
+        background-color: #00509e;
+    }
+
+    .result {
+        margin-top: 20px;
+        font-size: 18px;
+        font-weight: bold;
+        color: #002f6c;
+    }
+
+    img {
+        max-width: 100%;
+        height: auto;
+        margin-top: 20px;
+    }
+</style>
+
 </head>
 <body>
     <div class="container">
         <h1>Cilt Kanseri Tarama Sistemi</h1>
-        <form id="uploadForm">
-            <input type="file" id="fileInput" accept="image/*" required>
-            <div class="cropper-container">
-                <img id="image" src="#" alt="Seçilen Resim" style="display: none;">
-            </div>
-            <button type="button" id="cropBtn" class="btn" style="display: none;">Kırp</button>
-            <button type="button" id="predictBtn" class="btn" style="display: none;">Tahmin Et</button>
+        <form action="/" method="post" enctype="multipart/form-data">
+            <input type="file" name="file" required>
+            <button type="submit" class="btn">Tahmin Et</button>
         </form>
-        <div class="result" id="result"></div>
+
+        {% if prediction %}
+            <div class="result">
+                <p>Sonuç: <strong>{{ prediction|round(2) }}%</strong></p>
+                <p style="color: {{ 'red' if prediction > 50 else 'green' }}">{{ 'Dikkat: Kötü Huylu Olabilir' if prediction > 50 else 'Risk Taşımıyor' }}</p>
+            </div>
+        {% endif %}
     </div>
-
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.js"></script>
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            let cropper;
-            const fileInput = document.getElementById('fileInput');
-            const image = document.getElementById('image');
-            const cropBtn = document.getElementById('cropBtn');
-            const predictBtn = document.getElementById('predictBtn');
-            const resultDiv = document.getElementById('result');
-
-            fileInput.addEventListener('change', function (e) {
-                const file = e.target.files[0];
-                if (file) {
-                    const reader = new FileReader();
-                    reader.onload = function (event) {
-                        image.src = event.target.result;
-                        image.style.display = 'block';
-
-                        if (cropper) {
-                            cropper.destroy();
-                        }
-                        cropper = new Cropper(image, {
-                            aspectRatio: 1,
-                            viewMode: 1,
-                            autoCropArea: 1,
-                            responsive: true,
-                        });
-
-                        cropBtn.style.display = 'inline-block';
-                    };
-                    reader.readAsDataURL(file);
-                }
-            });
-
-            cropBtn.addEventListener('click', function () {
-                if (cropper) {
-                    const croppedCanvas = cropper.getCroppedCanvas({
-                        width: 250,
-                        height: 250,
-                    });
-
-                    image.src = croppedCanvas.toDataURL();
-                    cropper.destroy();
-                    predictBtn.style.display = 'inline-block';
-                }
-            });
-
-            predictBtn.addEventListener('click', function () {
-                const croppedCanvas = document.createElement('canvas');
-                croppedCanvas.width = 250;
-                croppedCanvas.height = 250;
-                const ctx = croppedCanvas.getContext('2d');
-                ctx.drawImage(image, 0, 0, 250, 250);
-
-                croppedCanvas.toBlob(function (blob) {
-                    const formData = new FormData();
-                    formData.append('file', blob, 'cropped_image.png');
-
-                    fetch('http://localhost:5000/', {
-                        method: 'POST',
-                        body: formData,
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        resultDiv.innerHTML = `<p>Sonuç: <strong>${data.prediction}%</strong></p>`;
-                    })
-                    .catch(error => {
-                        console.error('Hata:', error);
-                        resultDiv.innerHTML = `<p style="color: red;">Hata: ${error.message}</p>`;
-                    });
-                }, 'image/png');
-            });
-        });
-    </script>
 </body>
 </html>
+
+
+
