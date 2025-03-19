@@ -55,7 +55,7 @@ def predict_image(img_path):
     elif(prediction>50):
         prediction=prediction-40
     elif(prediction<50):
-        prediction=prediction/10
+        prediction=prediction/5
     return prediction
 @app.route("/", methods=["GET", "POST"])
 def index():
